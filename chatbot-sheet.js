@@ -1,7 +1,7 @@
 function doPost(e) {
-  var ssId = "1MQlN679VWrE2vAMSlDAYMV5EeQMvykyKBloL71EoxGs";
-  var ss = SpreadsheetApp.openByUrl("https://docs.google.com/spreadsheets/d/1MQlN679VWrE2vAMSlDAYMV5EeQMvykyKBloL71EoxGs/edit");
-  var sheet = ss.getSheetByName("data");
+  var ssId = "<Your sheet ID>";
+  var ss = SpreadsheetApp.openByUrl("<Your sheet URL>");
+  var sheet = ss.getSheetByName("<Sheet Name>");
 
   //use BetterLog
   Logger = BetterLog.useSpreadsheet(ssId);
