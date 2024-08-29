@@ -9,7 +9,7 @@ function doPost(e) {
   Logger = BetterLog.useSpreadsheet(ssId);
 
   var requestJSON = e.postData.contents;
-  Logger.log(requestJSON);
+  //Logger.log(requestJSON);
 
   const arrmonth = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 
