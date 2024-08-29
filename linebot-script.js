@@ -1,6 +1,6 @@
 function doPost(e) {
-  var ssId = "Your-sheet-ID";
-  var ss = SpreadsheetApp.openByUrl("Your-sheet-URL");
+  var ssId = "Your-GoogleSheet-ID";
+  var ss = SpreadsheetApp.openByUrl("Your*GoogleSheet-URL");
 
   var sheet = ss.getSheetByName("Messages");
   var lastRow = sheet.getLastRow() + 1;
@@ -9,7 +9,7 @@ function doPost(e) {
   Logger = BetterLog.useSpreadsheet(ssId);
 
   var requestJSON = e.postData.contents;
-  //Logger.log(requestJSON);
+  Logger.log(requestJSON);
 
   const arrmonth = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 
@@ -36,9 +36,11 @@ function doPost(e) {
 
     if(currentMonth == month && currentYear == year){
       if(currentCount == "500"){
-        msg = "ข้อความตอบกลับจากแชทบอท Your LINEBOT name ครบจำนวน 500 ข้อความแล้วค่ะ";
+        msg = "ข้อความตอบกลับจากแชทบอท ... ครบจำนวน 500 ข้อความแล้วค่ะ";
+      }else if(message == "ติดต่อสอบถาม"){
+        msg = "มีการสอบถามเพิ่มเติมจากแชทบอท ... ค่ะ";
       }else{
-        msg = "มีคำถามจากแชทบอท Your LINEBOT name ค่ะ";
+        msg = "มีคำถามจากแชทบอท ... ค่ะ";
       }
       sheet2.getRange(row,3).setValue(parseInt(currentCount)+1);
     }else{
@@ -47,8 +49,8 @@ function doPost(e) {
       sheet2.getRange(lastRow2,3).setValue(1);
     }
 
-  if (intent == "ไม่พบข้อมูล" || currentCount == "500"){
-    var token = "Your-Token-ID";
+  if (message == "ติดต่อสอบถาม" || intent == "ไม่พบข้อมูล" || currentCount == "500"){
+    var token = "Your-Token-ID-Generate-form-LINE-Notify";
     var url = "https://notify-api.line.me/api/notify";
     
     var options = {
