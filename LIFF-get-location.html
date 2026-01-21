@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ส่งตำแหน่งคนขับ</title>
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding-top: 50px; background-color: #f4f4f4; }
+        .status-box { background: white; padding: 20px; border-radius: 15px; margin: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #05B743; border-radius: 50%; width: 30px; height: 30px; animation: spin 2s linear infinite; margin: 10px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="status-box">
+        <h3 id="title">ระบบส่งพิกัดตำแหน่ง</h3>
+        <div id="loader" class="loader"></div>
+        <p id="status">กำลังเริ่มต้นระบบ...</p>
+    </div>
+
+    <script>
+        const LIFF_ID = "YOUR_LIFF_ID"; // **ใส่ LIFF ID ของคุณ**
+        const GAS_URL = "YOUR_GAS_WEB_APP_URL"; // **ใส่ URL ของ GAS**
+
+        async function main() {
+            try {
+                // 1. เริ่มต้น LIFF
+                await liff.init({ liffId: LIFF_ID });
+                
+                if (!liff.isLoggedIn()) {
+                    liff.login();
+                    return;
+                }
+
+                document.getElementById('status').innerText = "กำลังขอพิกัดจาก GPS เครื่อง...";
+
+                // 2. ใช้คำสั่งมาตรฐานของ Browser แทน liff.getLocation()
+                // วิธีนี้จะใช้ได้ทั้งใน LINE และใน Chrome
+                if (!navigator.geolocation) {
+                    throw new Error("เครื่องของคุณไม่รองรับการดึงพิกัด");
+                }
+
+                navigator.geolocation.getCurrentPosition(async (position) => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    
+                    document.getElementById('status').innerText = "กำลังดึงข้อมูลโปรไฟล์...";
+                    const profile = await liff.getProfile();
+
+                    document.getElementById('status').innerText = "กำลังส่งข้อมูลให้ผู้รับบริการ...";
+
+                    // 3. ส่งข้อมูลไปที่ GAS
+                    await fetch(GAS_URL, {
+                        method: 'POST',
+                        mode: 'no-cors', // สำคัญมากเพื่อเลี่ยงปัญหา CORS
+                        body: JSON.stringify({
+                            action: "driver_update_location",
+                            driverId: profile.userId,
+                            lat: lat,
+                            lon: lon
+                        })
+                    });
+
+                    document.getElementById('loader').style.display = "none";
+                    document.getElementById('status').innerText = "ส่งพิกัดสำเร็จ! กำลังปิดหน้าจอ...";
+                    setTimeout(() => liff.closeWindow(), 2000);
+
+                }, (err) => {
+                    // กรณีผู้ใช้กดปฏิเสธ หรือ GPS ปิดอยู่
+                    let msg = "กรุณาเปิด GPS และกดยอมรับการเข้าถึงตำแหน่ง";
+                    if(err.code == 1) msg = "คุณต้องกดยอมรับ (Allow) เพื่อส่งตำแหน่งค่ะ";
+                    alert(msg);
+                    document.getElementById('status').innerText = msg;
+                }, {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                });
+
+            } catch (err) {
+                alert("เกิดข้อผิดพลาด: " + err.message);
+                document.getElementById('status').innerText = err.message;
+            }
+        }
+
+        window.onload = main;
+    </script>
+</body>
+</html>
